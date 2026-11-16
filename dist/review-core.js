@@ -46,11 +46,11 @@
   }
   function combine(oldReview,incoming){const a=oldReview||empty(),b=incoming||empty();if(a.version!==1||b.version!==1)throw Error('지원하지 않는 원문 검토 형식입니다.');const merge=k=>[...new Map([...(a[k]||[]),...(b[k]||[])].map(x=>[x.id,x])).values()];return {version:1,papers:merge('papers'),relations:merge('relations'),questions:merge('questions')};}
   function prune(review,ids){const r=review||empty();return {version:1,papers:r.papers.filter(p=>ids.has(p.id)),relations:r.relations.filter(x=>ids.has(x.source)&&ids.has(x.target)),questions:r.questions.filter(q=>q.paperIds.every(id=>ids.has(id)))};}
-  function apply(D,review){
-    for(const r of review.papers){const p=D.papers.find(p=>p.id===r.id);if(!p)continue;const brief=r.documentType==='conference_extended_abstract';Object.assign(p,{...r,reviewed:true,verification:{level:brief?'abstract':'pdf',label:brief?'개인 학회요약 검토':'개인 원문 검토',detail:r.verificationDetail},publisherVerified:false});}
+  function apply(D,review,options={}){
+    for(const r of review.papers){const p=D.papers.find(p=>p.id===r.id);if(!p||p.publicReview&&!options.public)continue;const brief=r.documentType==='conference_extended_abstract';Object.assign(p,{...r,reviewed:true,publicReview:options.public===true,verification:{level:brief?'abstract':'pdf',label:(options.public?'공개 ':'개인 ')+(brief?'학회요약 검토':'원문 검토'),detail:r.verificationDetail},publisherVerified:false});}
     D.relations.push(...review.relations.filter(r=>!D.relations.some(x=>x.source===r.source&&x.target===r.target&&x.type===r.type)));
     for(const p of D.papers.filter(p=>p.reviewed)){if(p.shortTitle)p.graphLabel=p.shortTitle;if(!p.doi){p.sourceUrl=p.evidence.find(e=>e.paperId===p.id)?.url||'';p.sourceLabel='확인한 논문 페이지';}}
-    D.questions=[...(window.NAND_FRONTIERS||[]),...review.questions];
+    D.questions=[...(D.questions||window.NAND_FRONTIERS||[]),...review.questions.filter(q=>!(D.questions||window.NAND_FRONTIERS||[]).some(x=>x.id===q.id))];
   }
   window.NAND_REVIEW={empty,sanitize,combine,prune,apply};
 })();

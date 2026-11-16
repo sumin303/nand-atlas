@@ -104,10 +104,25 @@
     const methods=p.topics.filter(t=>methodIds.has(t));
     return D.papers.filter(q=>q.id!==p.id).map(q=>{const shared=methods.filter(t=>q.topics.includes(t)),device=p.topics.filter(t=>t.startsWith('device-')&&t!=='device-other'&&q.topics.includes(t));return {paper:q,shared,device,score:shared.length*3+device.length};}).filter(n=>n.shared.length).sort((a,b)=>b.score-a.score||b.paper.year-a.paper.year).slice(0,5);
   }
+  function publicBase(base){
+    const D=extend(base),published=window.NAND_PUBLIC_LIBRARY;
+    D.questions=[...(window.NAND_FRONTIERS||[])];
+    D.publicReview=window.NAND_REVIEW?.empty();
+    if(published){
+      const records=published.records.map(r=>sanitize({...r,owned:false,classificationBasis:'수집 문헌의 주제 분류입니다. 원문 검토 여부와 별도로 표시합니다.'},D));
+      for(const r of records){if(D.papers.some(p=>p.id===r.id||r.doi&&p.doi?.toLowerCase()===r.doi))continue;const p=asPaper(r,D);Object.assign(p,{personal:false,publishedReference:true,owned:false,approach:p.family==='analysis'?'분류 검토 · 수집 문헌':p.approach,summary:'서지와 주제 분류를 공개 맵에 수록했습니다. 원문 결과와 비교 관계는 아직 검토하지 않았습니다.',verification:{level:'metadata',label:'서지 등록 · 미검토',detail:'서지와 주제 분류만 수록한 문헌입니다. 누락된 저자·게재처·연도·DOI는 미확인으로 표시합니다. 원문 주장 검토와 구별됩니다.'}});D.papers.push(p);}
+      D.publicReview=window.NAND_REVIEW.sanitize(published.review,D,records);
+      for(const k of ['relations','questions'])D.publicReview[k]=D.publicReview[k].map(r=>({...r,personalReview:false,publicReview:true}));
+      window.NAND_REVIEW.apply(D,D.publicReview,{public:true});
+      D.description=`공개 문헌 ${D.papers.length}편의 서지·주제 분류와 근거가 확인된 연결을 탐색합니다. 원문 미검토 문헌을 별도로 표시합니다.`;
+      D.checkedAt=published.publishedAt;
+    }
+    return D;
+  }
   function merge(base,storage){
-    const D=extend(base),personal=load(D,storage);D.personal=personal;
-    for(const r of personal.records){if(r.doi&&D.papers.some(p=>p.doi?.toLowerCase()===r.doi))continue;D.papers.push(asPaper(r,D));}
-    D.questions=window.NAND_FRONTIERS||[];if(window.NAND_REVIEW)window.NAND_REVIEW.apply(D,personal.review);
+    const D=publicBase(base),personal=load(D,storage);D.personal=personal;
+    for(const r of personal.records){if(D.papers.some(p=>p.id===r.id||r.doi&&p.doi?.toLowerCase()===r.doi))continue;D.papers.push(asPaper(r,D));}
+    if(window.NAND_REVIEW){window.NAND_REVIEW.apply(D,personal.review);D.reviews=window.NAND_REVIEW.combine(personal.review,D.publicReview);}
     D.venues=[...new Set(D.papers.map(p=>p.venue))];
     const publicCorpus={...D,papers:D.papers.filter(p=>!p.personal)};
     for(const p of D.papers.filter(p=>p.personal&&!p.reviewed))for(const n of neighbors(p,publicCorpus).slice(0,3)){
@@ -116,5 +131,5 @@
     }
     return D;
   }
-  window.NAND_PERSONAL={KEY,MAX,devices,rules,methodIds,normalizeDOI,doiURL,extractDOIs,classify,crossref,extend,load,write,sanitize,merge,neighbors,asPaper,cleanMarkup};
+  window.NAND_PERSONAL={KEY,MAX,devices,rules,methodIds,normalizeDOI,doiURL,extractDOIs,classify,crossref,extend,publicBase,load,write,sanitize,merge,neighbors,asPaper,cleanMarkup};
 })();
