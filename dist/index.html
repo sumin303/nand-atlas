@@ -7,11 +7,11 @@
   <meta name="description" content="NAND 연구와 내 논문의 위치, 접근법, 직접 인용과 조건별 차이를 원문 근거와 함께 탐색하는 연구 지도.">
   <title>NAND Atlas — Research, connected.</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=0.6.1">
-  <link rel="stylesheet" href="./cluster.css?v=0.6.1">
-  <link rel="stylesheet" href="./evidence.css?v=0.6.1">
-  <link rel="stylesheet" href="./landscape.css?v=0.6.1">
-  <link rel="stylesheet" href="./personal.css?v=0.6.1">
+  <link rel="stylesheet" href="./style.css?v=0.7.0">
+  <link rel="stylesheet" href="./cluster.css?v=0.7.0">
+  <link rel="stylesheet" href="./evidence.css?v=0.7.0">
+  <link rel="stylesheet" href="./landscape.css?v=0.7.0">
+  <link rel="stylesheet" href="./personal.css?v=0.7.0">
 </head>
 <body>
 <header class="topbar">
@@ -24,12 +24,13 @@
     <div class="sidebar-heading"><span class="eyebrow">YOUR RESEARCH SPACE</span><div class="space-title">NAND Flash <span>↗</span></div><p>기술의 흐름을 따라, 연구를 연결하다.</p></div>
     <label class="search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg><input id="search" type="search" placeholder="개념 또는 논문 검색" autocomplete="off"><kbd>/</kbd></label>
     <div id="search-results" class="search-results" hidden></div>
-    <button id="my-research-btn" class="my-research-btn">★ 내 연구 위치 <span>↗</span></button>
+    <button id="my-research-btn" class="my-research-btn">연구 위치 자료 <span>↗</span></button>
     <button class="frontiers-launch" data-frontiers><span>?</span> 쟁점 · 미싱 링크 <span>↗</span></button>
     <label class="question-toggle"><input id="show-questions" type="checkbox" checked> 점선 · 질문 표시</label>
     <div class="section-label">EXPLORE <span>연구 주제</span></div>
     <nav id="topic-tree" class="topic-tree" aria-label="개념 트리"></nav>
     <div class="filter-heading"><span class="section-label">CONNECTIONS</span><button id="reset-filters" class="text-btn">초기화</button></div>
+    <label class="edge-scope-label">논문 연결선<select id="edge-scope"><option value="selected">선택한 논문만</option><option value="all">전체 연결</option></select></label><p class="edge-scope-help">논문 점을 누르면 그 논문의 선이 나타납니다.</p>
     <div id="relation-filters" class="relation-filters"></div>
     <div class="section-label venue-heading">PUBLICATIONS <span>학회 · 저널</span></div>
     <div id="venue-filters" class="venue-filters"></div>
@@ -52,5 +53,5 @@
 <div id="compare-tray" class="compare-tray" hidden><span><b id="compare-count">0</b>편 선택됨</span><div id="compare-titles"></div><button id="compare-open" class="primary-btn">접근법 비교 <span>↗</span></button><button id="compare-clear" class="icon-btn" aria-label="비교 선택 초기화">×</button></div>
 <dialog id="modal"><div id="modal-content"></div><button id="modal-close" class="modal-close icon-btn" aria-label="대화상자 닫기">×</button></dialog>
 <div id="toast" class="toast" role="status"></div>
-<script src="./data.js?v=0.6.1"></script><script src="./retention-data.js?v=0.6.1"></script><script src="./landscape-data.js?v=0.6.1"></script><script src="./ml-neighborhood-data.js?v=0.6.1"></script><script src="./frontiers-data.js?v=0.6.1"></script><script src="./personal-core.js?v=0.6.1"></script><script src="./cluster-layout.js?v=0.6.1"></script><script src="./app.js?v=0.6.1"></script><script src="./personal-ui.js?v=0.6.1"></script>
+<script src="./data.js?v=0.7.0"></script><script src="./retention-data.js?v=0.7.0"></script><script src="./landscape-data.js?v=0.7.0"></script><script src="./ml-neighborhood-data.js?v=0.7.0"></script><script src="./frontiers-data.js?v=0.7.0"></script><script src="./personal-core.js?v=0.7.0"></script><script src="./cluster-layout.js?v=0.7.0"></script><script src="./frontier-layout.js?v=0.7.0"></script><script src="./app.js?v=0.7.0"></script><script src="./personal-ui.js?v=0.7.0"></script>
 </body></html>

@@ -35,7 +35,7 @@
         areas.push({id:g.id,label:g.label,color:g.color,x:cx,y:cy,rx,ry,count:g.papers.length});
         g.papers.forEach((p,j)=>{
           const row=Math.floor(j/cols),rowCount=Math.min(cols,g.papers.length-row*cols);
-          nodes.push({id:p.id,label:p.graphLabel||p.shortTitle||titles[p.id]||p.approach,group:conceptLookup.get(p.topics[0]).group,clusterColor:p.owned?'#e9c881':g.color,family:g.id,isPaper:true,x:cx+(j%cols-(rowCount-1)/2)*160,y:cy+(row-(rows-1)/2)*100-8,...(positions.get(p.id)||{})});
+          nodes.push({id:p.id,label:p.graphLabel||p.shortTitle||titles[p.id]||p.approach,group:conceptLookup.get(p.topics[0]).group,clusterColor:p.owned&&p.highlight!==false?'#e9c881':g.color,family:g.id,isPaper:true,x:cx+(j%cols-(rowCount-1)/2)*160,y:cy+(row-(rows-1)/2)*100-8,...(positions.get(p.id)||{})});
         });
       });
       const ids=new Set(paperList.map(p=>p.id));
