@@ -11,12 +11,13 @@
   <link rel="stylesheet" href="./cluster.css">
   <link rel="stylesheet" href="./evidence.css">
   <link rel="stylesheet" href="./landscape.css">
+  <link rel="stylesheet" href="./personal.css">
 </head>
 <body>
 <header class="topbar">
   <a class="brand" href="#" aria-label="NAND Atlas 홈"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 8 16 4 26 10 23 25 10 28 6 8ZM6 8 23 25M16 4 10 28M6 8 26 10 10 28"/><circle cx="6" cy="8" r="2.6"/><circle cx="16" cy="4" r="2.6"/><circle cx="26" cy="10" r="2.6"/><circle cx="23" cy="25" r="2.6"/><circle cx="10" cy="28" r="2.6"/></svg><span>NAND<span class="brand-light">Atlas</span></span><span class="version">LAB / 01</span></a>
   <nav class="main-nav" aria-label="화면 선택"><button data-view="map" class="active">연구 맵</button><button data-view="library">논문 라이브러리 <span>18</span></button></nav>
-  <div class="header-actions"><label class="dataset-control"><span class="sr-only">데이터 선택</span><select id="dataset-select"><option value="research">실제 논문 · NAND 전체</option><option value="demo">가상 예시 · Prototype</option></select></label><button id="about-btn" class="icon-btn" aria-label="맵 안내 및 데이터 원칙">?</button><button id="export-btn" class="subtle-btn"><span aria-hidden="true">↓</span> 데이터 내보내기</button></div>
+  <div class="header-actions"><button class="primary-btn" data-personal-add>+ 논문 추가</button><button class="subtle-btn" data-personal-manage>나의 논문 <span id="personal-count">0</span></button><label class="dataset-control"><span class="sr-only">데이터 선택</span><select id="dataset-select"><option value="research">실제 논문 · 개인 맵</option><option value="demo">가상 예시 · Prototype</option></select></label><button id="about-btn" class="icon-btn" aria-label="맵 안내 및 데이터 원칙">?</button><button id="export-btn" class="subtle-btn"><span aria-hidden="true">↓</span> 전체 맵</button></div>
 </header>
 <div class="workspace">
   <aside class="sidebar" aria-label="주제 탐색 및 필터">
@@ -24,6 +25,8 @@
     <label class="search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg><input id="search" type="search" placeholder="개념 또는 논문 검색" autocomplete="off"><kbd>/</kbd></label>
     <div id="search-results" class="search-results" hidden></div>
     <button id="my-research-btn" class="my-research-btn">★ 내 연구 위치 <span>↗</span></button>
+    <button class="frontiers-launch" data-frontiers><span>?</span> 쟁점 · 미싱 링크 <span>↗</span></button>
+    <label class="question-toggle"><input id="show-questions" type="checkbox" checked> 점선 · 질문 표시</label>
     <div class="section-label">EXPLORE <span>연구 주제</span></div>
     <nav id="topic-tree" class="topic-tree" aria-label="개념 트리"></nav>
     <div class="filter-heading"><span class="section-label">CONNECTIONS</span><button id="reset-filters" class="text-btn">초기화</button></div>
@@ -49,5 +52,5 @@
 <div id="compare-tray" class="compare-tray" hidden><span><b id="compare-count">0</b>편 선택됨</span><div id="compare-titles"></div><button id="compare-open" class="primary-btn">접근법 비교 <span>↗</span></button><button id="compare-clear" class="icon-btn" aria-label="비교 선택 초기화">×</button></div>
 <dialog id="modal"><div id="modal-content"></div><button id="modal-close" class="modal-close icon-btn" aria-label="대화상자 닫기">×</button></dialog>
 <div id="toast" class="toast" role="status"></div>
-<script src="./data.js"></script><script src="./retention-data.js"></script><script src="./landscape-data.js"></script><script src="./ml-neighborhood-data.js"></script><script src="./cluster-layout.js"></script><script src="./app.js"></script>
+<script src="./data.js"></script><script src="./retention-data.js"></script><script src="./landscape-data.js"></script><script src="./ml-neighborhood-data.js"></script><script src="./frontiers-data.js"></script><script src="./personal-core.js"></script><script src="./cluster-layout.js"></script><script src="./app.js"></script><script src="./personal-ui.js"></script>
 </body></html>
