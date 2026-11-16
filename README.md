@@ -4,7 +4,7 @@
 공개 맵에는 32편의 실제 문헌, 46개 개념, 55개 근거 연결과 기존 논문 17쌍에 대한 11개의 연구 질문을 수록합니다.
 개인 맵에는 DOI·PDF로 논문을 추가할 수 있습니다.
 
-[전체 맵 열기](https://sumin303.github.io/nand-atlas/?v=0.8.0#topic=nand&view=overview) · [Retention 비교 질문](https://sumin303.github.io/nand-atlas/?v=0.8.0#topic=nand&view=frontier&issue=gap-retention-pattern-boundary&pair=0)
+[전체 맵 열기](https://sumin303.github.io/nand-atlas/?v=0.8.1#topic=nand&view=overview) · [Retention 비교 질문](https://sumin303.github.io/nand-atlas/?v=0.8.1#topic=nand&view=frontier&issue=gap-retention-pattern-boundary&pair=0)
 
 ## 단계별 연구 맵
 

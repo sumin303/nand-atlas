@@ -1,6 +1,6 @@
 {
   "name": "nand-atlas",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "private": true,
   "description": "Evidence-linked NAND research landscape and personal paper placement",
   "scripts": {
