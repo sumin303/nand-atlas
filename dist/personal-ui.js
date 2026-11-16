@@ -57,11 +57,12 @@
     const ticket=++epoch;abort?.abort();if(file.size>25*1024*1024){status('25 MB 이하의 PDF를 선택해 주세요.',true);return;}
     if(!/\.pdf$/i.test(file.name)){status('PDF 파일을 선택해 주세요.',true);return;}
     status('PDF를 이 브라우저에서 읽고 있습니다…');$('#doi-fetch').disabled=true;
-    let doc;
+    let doc,loadingTask;
     try{
       const bytes=new Uint8Array(await file.arrayBuffer());if(new TextDecoder().decode(bytes.slice(0,1024)).indexOf('%PDF-')<0)throw Error('유효한 PDF 파일이 아닙니다.');
       const pdfjs=await import('./vendor/pdfjs/pdf.mjs');pdfjs.GlobalWorkerOptions.workerSrc=new URL('./vendor/pdfjs/pdf.worker.mjs',location.href).href;
-      doc=await pdfjs.getDocument({data:bytes,isEvalSupported:false,disableFontFace:true,useSystemFonts:false,useWorkerFetch:false}).promise;
+      loadingTask=pdfjs.getDocument({data:bytes,isEvalSupported:false,disableFontFace:true,useSystemFonts:false,useWorkerFetch:false});
+      doc=await loadingTask.promise;
       const texts=[],readCount=Math.min(doc.numPages,40);let metadata;
       try{metadata=await doc.getMetadata();}catch{}
       for(let pageNo=1;pageNo<=readCount;pageNo++){
@@ -72,7 +73,7 @@
       if(ticket!==epoch||!$('#paper-form'))return;
       const full=texts.join('\n\n'),main=full.split(/(?:\n\s*|\s{2,})(?:references|bibliography)\s*\n/i)[0];
       const first=texts[0]||'',candidates=C.extractDOIs(first),abstract=(main.match(/\babstract\s*[:—–-]?\s*([\s\S]{60,3500}?)(?:index terms|keywords|\n\s*(?:I\.?\s+)?introduction)/i)||[])[1]||'';
-      const suggested=metadata?.info?.Title?.trim();
+      const suggested=metadata?.info?.Title?.replace(/<[^>]*>/g,'').trim();
       draft={...draft,pdfRead:true,pagesRead:readCount,totalPages:doc.numPages,body:main.slice(0,160000),metadataProvider:'PDF에서 추출'};
       if(suggested&&!/^untitled|^microsoft|^word/i.test(suggested))$('#paper-title').value=suggested.slice(0,700);
       else if(!$('#paper-title').value)$('#paper-title').value=file.name.replace(/\.pdf$/i,'').replace(/_/g,' ').slice(0,700);
@@ -82,7 +83,7 @@
       if($('#pdf-doi-candidate'))$('#pdf-doi-candidate').onchange=e=>{$('#import-doi').value=e.target.value;};
       classify();status('PDF 텍스트를 읽었습니다. 제목·DOI·분류를 확인해 주세요. PDF 내용은 외부에 보내지 않았습니다.');
     }catch(e){if(ticket===epoch)status(e.name==='PasswordException'?'암호로 잠긴 PDF입니다. 잠금 해제한 파일을 선택하거나 서지를 직접 입력해 주세요.':`PDF를 읽지 못했습니다: ${e.message||'텍스트 추출 오류'}. DOI 또는 직접 입력을 이용할 수 있습니다.`,true);}
-    finally{if(ticket===epoch&&$('#doi-fetch'))$('#doi-fetch').disabled=false;doc?.destroy().catch(()=>{});}
+    finally{if(ticket===epoch&&$('#doi-fetch'))$('#doi-fetch').disabled=false;loadingTask?.destroy().catch(()=>{});}
   }
   function save(event){
     event.preventDefault();try{
