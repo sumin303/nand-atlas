@@ -29,7 +29,7 @@
     ['ispp','ISPP',/\bispp\b|incremental.step.pulse/gi],
     ['program','Programming',/programming|program pulse|프로그램 동작/gi],
     ['erase','Erase',/\berase\b|소거/gi],
-    ['3d','3D NAND',/3.d.{0,12}nand|vertical.{0,12}nand/gi],
+    ['3d','3D NAND',/3[\s-]?d.{0,12}nand|vertical.{0,12}nand|\bv[\s-]?nand\b/gi],
     ['ctn','Charge-trap NAND',/charge.trap.{0,20}nand|\bctn\b/gi],
     ['fg','Floating gate',/floating.gate/gi]
   ];
