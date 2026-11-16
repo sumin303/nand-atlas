@@ -26,7 +26,7 @@
   const verificationLabel = p => isDemo ? '가상 예시' : p.verification.label;
   const relationStatus = r => isDemo ? '가상 예시' : ({citation_verified:'참고문헌 확인',author_comparison:'저자 본문 비교',analyst_comparison:'분석자 비교'}[r.status] || r.status);
   const badge = p => `<span class="verification-badge ${isDemo?'mock':p.verification.level}">${esc(verificationLabel(p))}</span>`;
-  const sourceLinks = p => isDemo ? '' : `<div class="source-links">${p.doi?`<a href="https://doi.org/${esc(p.doi)}" target="_blank" rel="noopener noreferrer">DOI ↗</a>`:''}<a href="${esc(p.sourceUrl)}" target="_blank" rel="noopener noreferrer">${esc(p.sourceLabel||(p.verification.level==='abstract'?'확인한 초록':p.id==='P21'||p.id==='P22'?'원문 위치 · 접근 제한':'확인한 원문'))} ↗</a>${p.metadataUrl&&p.metadataUrl!==p.sourceUrl?`<a href="${esc(p.metadataUrl)}" target="_blank" rel="noopener noreferrer">서지 정보 ↗</a>`:''}</div>`;
+  const sourceLinks = p => isDemo ? '' : `<div class="source-links">${p.doi?`<a href="https://doi.org/${esc(p.doi)}" target="_blank" rel="noopener noreferrer">출판사 원문 · DOI ↗</a>`:''}<a href="${esc(p.sourceUrl)}" target="_blank" rel="noopener noreferrer">${esc(p.sourceLabel||(p.verification.level==='abstract'?'확인한 초록':p.id==='P21'||p.id==='P22'?'원문 위치 · 접근 제한':'확인한 원문'))} ↗</a>${p.metadataUrl&&p.metadataUrl!==p.sourceUrl?`<a href="${esc(p.metadataUrl)}" target="_blank" rel="noopener noreferrer">서지 정보 ↗</a>`:''}</div>`;
   const evidenceItems = list => list.map(e=>{const p=papers.get(e.paperId);return `<div class="evidence-item"><a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">${esc(e.paperId)} · ${esc(e.locator)} ↗</a><p>${esc(e.note)}</p><small>${esc(p.venue)} ${p.year} · ${esc(p.verification.label)}${p.id==='P21'||p.id==='P22'?' · 검색 색인 확인 / 직접 PDF 접근 제한':''}</small></div>`;}).join('');
   function initializeDatasetUI(){
     $('#dataset-select').value=isDemo?'demo':'research';
@@ -36,7 +36,7 @@
     $('#evidence-filter-wrap').hidden=isDemo;
     $('#my-research-btn').hidden=isDemo;
     $('#library-view').setAttribute('aria-label',isDemo?'가상 논문 라이브러리':'실제 논문 라이브러리');
-    $('#library-view > .muted').textContent=isDemo?'18편의 가상 논문으로 탐색 구조를 시험합니다. 실제 서지 정보가 아닙니다.':D.description;
+    $('#library-view > .muted').textContent=isDemo?'18편의 가상 논문으로 탐색 구조를 시험합니다. 실제 서지 정보가 아닙니다.':D.description+' 원문은 논문의 DOI 버튼으로 출판사에서 엽니다. 열람 범위는 출판사의 공개 여부와 본인의 구독·기관 인증에 따릅니다.';
     $('#sort-papers option[value="newest"]').textContent=isDemo?'예시 연도 최신순':'발행 연도 최신순';
     $('#sort-papers option[value="oldest"]').textContent=isDemo?'예시 연도 오래된순':'발행 연도 오래된순';
     const levels=['pdf','text','abstract'].map(level=>D.papers.filter(p=>p.verification?.level===level).length),cites=D.relations.filter(r=>r.type==='cites').length;
