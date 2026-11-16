@@ -13,6 +13,8 @@ const classification=C.classify({title:'Physics-Informed Transfer Learning of Fi
 assert(classification.topics.includes('transfer'));assert(classification.topics.includes('physics-ml'));assert(classification.topics.includes('device-finfet'));assert(!classification.topics.includes('device-nand'));
 const referencesOnly=C.classify({title:'Analysis of a bipolar transistor',body:'Experimental measurement.\nReferences\nA generative diffusion DDPM transfer learning model.'});
 assert(!referencesOnly.topics.includes('generative'));assert(!referencesOnly.topics.includes('transfer'));
+assert(!C.classify({title:'Drift Diffusion Modeling of NAND Flash Charge Transport'}).topics.includes('generative'));
+assert(C.classify({title:'Conditional Diffusion Model for RRAM Characteristics'}).topics.includes('generative'));
 const raw={title:'A FinFET model',doi:'10.1234/test',authors:['Test Author'],venue:'Other venue',year:2025,topics:['transfer','surrogate','device-finfet'],abstract:'A test abstract.',verification:{level:'pdf'},publisherVerified:true,body:'SECRET FULL TEXT',sourceUrl:'javascript:alert(1)'};
 const clean=C.sanitize(raw,D);assert(!('body'in clean));assert(!('sourceUrl'in clean));assert(!('publisherVerified'in clean));
 C.write({records:[clean],focusId:clean.id},storage);
@@ -41,5 +43,9 @@ assert.equal(F.pairEdges(ctx.window.NAND_FRONTIERS,[{id:'P26',isPaper:true}]).le
 assert.equal(F.scopeEdges([...D.relations,...gaps],null).length,0);
 assert(F.scopeEdges([...D.relations,...gaps],'P20').every(e=>e.source==='P20'||e.target==='P20'));
 assert.equal(F.scopeEdges(gaps,null,'all').length,17);
+const bulk=Array.from({length:400},(_,i)=>C.sanitize({...raw,title:`Private device model ${i}`,doi:`10.1234/bulk-${i}`},D));
+C.write({records:bulk,focusId:null},storage);const bulkMap=C.merge(original,storage);
+assert.equal(bulkMap.papers.filter(p=>p.personal).length,400);assert.equal(C.load(D,storage).records.length,400);
+assert(bulkMap.relations.filter(r=>r.type==='hypothesis').every(r=>original.papers.some(p=>p.id===r.target)));
 stored.set(C.KEY,'bad json');assert(C.load(D,storage).warning);assert.equal(C.load(D,storage).records.length,0);
 console.log('Personal map checks passed: DOI normalization, cross-device classification, reference exclusion, metadata-only trust, safe persistence, duplicate prevention, suggestions, and source-grounded questions.');
