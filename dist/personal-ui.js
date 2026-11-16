@@ -2,7 +2,7 @@
   'use strict';
   const A=window.ATLAS_APP,C=window.NAND_PERSONAL;if(!A||A.isDemo)return;
   const $=s=>document.querySelector(s),esc=A.esc;
-  let draft=null,epoch=0,abort=null,removed=null;
+  let draft=null,epoch=0,abort=null,removed=null,removedReview=null;
   const base=()=>C.extend(window.NAND_REAL_DATA),records=()=>C.load(base());
   const status=(message,error=false)=>{const el=$('#import-status');if(el){el.textContent=message;el.classList.toggle('error',error);}};
   function openImport(record=null){
@@ -101,7 +101,7 @@
     const store=records();
     A.openModal(`<div class="modal-eyebrow">MY MAP / THIS BROWSER</div><h2>나의 논문 ${store.records.length}편</h2><p>이 브라우저에 저장한 서지·분류·메모입니다. 공개 맵에 반영하려면 JSON을 내보내 이 대화에서 원문 근거를 함께 검토할 수 있습니다. 기기·브라우저 간 자동 동기화는 없습니다.</p><div class="personal-toolbar"><button class="primary-btn" data-personal-add>+ 논문 추가</button><button class="subtle-btn" data-personal-export>개인 맵 JSON 내보내기 ↓</button><label class="file-button">JSON 가져오기<input type="file" id="personal-json" accept=".json,application/json"></label></div><div id="personal-status" role="status">${esc(store.warning||'PDF와 전문은 백업에 포함되지 않습니다.')}</div>${removed?'<button class="subtle-btn" id="restore-personal">방금 삭제한 논문 복원</button>':''}<div class="personal-records">${store.records.map(p=>`<article><div><b>${p.owned?'★ 내 연구':'◇ 추가 논문'} · ${esc(p.venue)} ${p.year||''}</b><h3>${esc(p.title)}</h3><small>${esc(p.doi||'DOI 없이 수동 등록')}</small></div><div class="personal-row-actions"><button data-personal-focus="${p.id}">맵 위치 ↗</button><button data-personal-edit="${p.id}">편집</button><button data-personal-remove="${p.id}">삭제</button></div></article>`).join('')||'<p class="library-empty">추가한 논문이 없습니다. DOI 또는 PDF로 시작하세요.</p>'}</div>`);
     $('#personal-json').onchange=importJSON;
-    if($('#restore-personal'))$('#restore-personal').onclick=()=>{const s=records();s.records.push(removed);C.write(s);removed=null;A.reloadPersonal();manage();};
+    if($('#restore-personal'))$('#restore-personal').onclick=()=>{const s=records();s.records.push(removed);s.review=window.NAND_REVIEW.combine(s.review,removedReview);C.write(s);removed=null;removedReview=null;A.reloadPersonal();manage();};
   }
   async function importJSON(event){
     const file=event.target.files?.[0];if(!file)return;
@@ -109,15 +109,20 @@
       if(file.size>8*1024*1024)throw Error('8 MB 이하의 개인 맵 JSON을 선택해 주세요.');
       const incoming=JSON.parse(await file.text());if(incoming.version!==1||!Array.isArray(incoming.records))throw Error('개인 맵 내보내기로 만든 JSON이 아닙니다.');
       if(incoming.records.length>C.MAX)throw Error(`최대 ${C.MAX}편까지 가져올 수 있습니다.`);
-      const D=base(),clean=incoming.records.map(p=>C.sanitize(p,D)),store=records();let count=0;
-      for(const p of clean){if(store.records.some(r=>r.id===p.id)||D.papers.some(r=>p.doi&&r.doi?.toLowerCase()===p.doi))continue;store.records.push(p);count++;}
+      const D=base(),clean=incoming.records.map(p=>C.sanitize(p,D)),store=records(),updateIds=new Set([...(incoming.review?.papers||[]).map(p=>p.id),...(Array.isArray(incoming.updates)?incoming.updates:[])]);let count=0,updated=0;
+      for(const p of clean){const i=store.records.findIndex(r=>r.id===p.id);if(i>=0){if(updateIds.has(p.id)){store.records[i]={...p,owned:store.records[i].owned,notes:store.records[i].notes||p.notes};updated++;}continue;}if(D.papers.some(r=>p.doi&&r.doi?.toLowerCase()===p.doi))continue;store.records.push(p);count++;}
       if(store.records.length>C.MAX)throw Error(`합계 ${C.MAX}편을 초과합니다. 저장된 항목을 정리해 주세요.`);
-      C.write(store);A.reloadPersonal();manage();$('#personal-status').textContent=`${count}편을 가져왔습니다. 같은 DOI·항목은 중복 추가하지 않았습니다. 관계는 미검토 후보로 다시 계산합니다.`;
+      if(incoming.review)store.review=window.NAND_REVIEW.sanitize(window.NAND_REVIEW.combine(store.review,incoming.review),D,store.records);
+      C.write(store);A.reloadPersonal();manage();$('#personal-status').textContent=`${count}편 추가 · ${updated}편 갱신. 원문 검토 ${store.review?.papers.length||0}편 · 근거 연결 ${store.review?.relations.length||0}개 · 검토 질문 ${store.review?.questions.length||0}개. 기존 연구자 표시와 개인 메모는 유지합니다.`;
     }catch(e){$('#personal-status').textContent=e.name==='QuotaExceededError'?'브라우저 저장 공간이 부족하여 가져오지 않았습니다. 기존 개인 맵은 유지됩니다. JSON을 보관하고 더 작은 묶음으로 가져오세요.':`가져오지 않았습니다: ${e.message}`;}
+  }
+  function reviewedLibrary(){
+    const r=A.data.personal?.review||window.NAND_REVIEW.empty(),ps=r.papers.map(x=>A.papers.get(x.id)).filter(Boolean),label=id=>{const p=A.papers.get(id);return `${p?.authors[0]||id} · ${p?.title.slice(0,72)||id}`;};
+    A.openModal(`<div class="modal-eyebrow">PERSONAL ORIGINALS / EVIDENCE REVIEW</div><h2>내 연구 주변, 원문으로 확인한 연결</h2><p>${ps.length}편 검토 (학회요약 ${ps.filter(p=>p.documentType==='conference_extended_abstract').length}편 포함) · 직접 인용 ${r.relations.filter(x=>x.type==='cites').length}개 · 접근·조건 비교 ${r.relations.filter(x=>x.type!=='cites').length}개 · 후속 질문 ${r.questions.length}개</p><div class="privacy-strip">이 브라우저의 개인 검토 기록입니다. 원문 위치와 해석을 함께 저장하며 PDF·전문은 공개하지 않습니다. 비교선은 성능 우열이나 검증된 모순을 뜻하지 않습니다.</div><h3>함께 검증할 질문</h3>${r.questions.map(q=>`<button class="question-list-button" data-frontier="${esc(q.id)}"><span>?</span>${esc(q.title)} ↗</button>`).join('')}<h3 class="position-heading">확인한 인용과 접근 차이</h3>${r.relations.map(x=>`<button class="question-list-button" data-edge="${esc(x.id)}"><small>${x.type==='cites'?'참고문헌 확인 →':'양쪽 원문 비교 ↔'}</small><br>${esc(label(x.source))}<br>${x.type==='cites'?'→':'↔'} ${esc(label(x.target))}<br><small>${esc(x.note)}</small></button>`).join('')}<h3 class="position-heading">검토한 논문</h3>${ps.map(p=>`<article class="neighbor-preview"><button data-paper="${p.id}" data-close-modal="true"><b>${esc(p.venue)} ${p.year||''} · ${esc(p.title)} ↗</b></button><p>${esc(p.summary)}</p><small>${esc(p.verification.detail)}</small></article>`).join('')||'<p>아직 개인 원문 검토 기록이 없습니다.</p>'}`);
   }
   function showPosition(p){
     const ns=C.neighbors(p,A.data),qs=(A.data.questions||[]).filter(q=>q.topics.some(t=>p.topics.includes(t)));
-    A.openModal(`<div class="modal-eyebrow">PERSONAL PAPER / POSITION CANDIDATE</div><h2>${esc(p.title)}</h2><p>${esc(p.deviceScope)} · ${esc(p.approach)}</p><div class="privacy-strip">개인 맵 · ${esc(p.verification.label)} · 주장·독창성 검토 전</div><h3>배치한 이유</h3><p>${esc(p.classificationBasis)}</p><div class="tag-row">${p.topics.map(t=>`<span class="chip">${esc(A.concepts.get(t)?.label||t)}</span>`).join('')}</div><h3 class="position-heading">비교할 방법론 이웃</h3>${ns.map(n=>`<article class="neighbor-preview"><button data-paper="${n.paper.id}" data-close-modal="true">${esc(n.paper.id)} · ${esc(n.paper.title)} ↗</button><small>공통: ${n.shared.map(t=>esc(A.concepts.get(t)?.label||t)).join(' · ')}</small><p>${esc(n.paper.limitation)}</p></article>`).join('')||'<p>현재 수록 문헌에서 공통 방법론 이웃을 찾지 못했습니다.</p>'}<h3 class="position-heading">내 논문과 함께 검토할 질문</h3><p>이 질문들을 해결했다는 뜻이나 독창성 판정이 아닙니다. 원문의 평가 범위를 확인해 연결하세요.</p>${qs.map(q=>`<button class="question-list-button" data-frontier="${q.id}"><span>?</span>${esc(q.title)} ↗</button>`).join('')||'<p>현재 분류와 연결된 검토 질문이 없습니다.</p>'}<button class="subtle-btn" data-personal-edit="${p.id}">분류·메모 수정</button>`);
+    A.openModal(`<div class="modal-eyebrow">PERSONAL PAPER / POSITION CANDIDATE</div><h2>${esc(p.title)}</h2><p>${esc(p.deviceScope)} · ${esc(p.approach)}</p><div class="privacy-strip">개인 맵 · ${esc(p.verification.label)} · ${p.reviewed?'원문 근거 확인 · 분야 전체의 독창성 판정은 아님':'주장·독창성 검토 전'}</div><h3>배치한 이유</h3><p>${esc(p.classificationBasis)}</p><div class="tag-row">${p.topics.map(t=>`<span class="chip">${esc(A.concepts.get(t)?.label||t)}</span>`).join('')}</div><h3 class="position-heading">비교할 방법론 이웃</h3>${ns.map(n=>`<article class="neighbor-preview"><button data-paper="${n.paper.id}" data-close-modal="true">${esc(n.paper.id)} · ${esc(n.paper.title)} ↗</button><small>공통: ${n.shared.map(t=>esc(A.concepts.get(t)?.label||t)).join(' · ')}</small><p>${esc(n.paper.limitation)}</p></article>`).join('')||'<p>현재 수록 문헌에서 공통 방법론 이웃을 찾지 못했습니다.</p>'}<h3 class="position-heading">내 논문과 함께 검토할 질문</h3><p>이 질문들을 해결했다는 뜻이나 독창성 판정이 아닙니다. 원문의 평가 범위를 확인해 연결하세요.</p>${qs.map(q=>`<button class="question-list-button" data-frontier="${q.id}"><span>?</span>${esc(q.title)} ↗</button>`).join('')||'<p>현재 분류와 연결된 검토 질문이 없습니다.</p>'}<button class="subtle-btn" data-personal-edit="${p.id}">분류·메모 수정</button>`);
   }
   function showFrontier(id,index=0){
     const q=A.data.questions?.find(q=>q.id===id);if(!q)return;const pair=q.pairs[index]||q.pairs[0];
@@ -125,21 +130,22 @@
   }
   function frontiers(){
     const categories=[...new Set(A.data.questions.map(q=>q.category))];
-    A.openModal(`<div class="modal-eyebrow">EXISTING CORPUS / PAIRWISE QUESTIONS</div><h2>수록 논문 사이, 아직 남은 질문.</h2><p>이미 들어 있는 공개 문헌 ${A.data.papers.filter(p=>!p.personal).length}편 중 ${A.data.questions.length}개 쟁점, ${A.data.questions.reduce((n,q)=>n+q.pairs.length,0)}개 논문 쌍을 비교합니다. 각 카드를 열고 두 논문만 확대해 보세요.</p>${categories.map(category=>`<h3 class="position-heading">${esc(category)}</h3><div class="frontier-grid">${A.data.questions.filter(q=>q.category===category).map(q=>`<button class="frontier-card" data-frontier="${q.id}"><span class="frontier-symbol">?</span><small>${esc(q.relationLabel)}</small><h3>${esc(q.title)}</h3><p>${esc(q.question)}</p><span>${q.pairs.map(p=>`${p.source} ↔ ${p.target}`).join(' / ')} ↗</span></button>`).join('')}</div>`).join('')}<div class="modal-note">점선 ? = 조건 차이를 판별하거나 방법을 연결할 추가 검증. 이미 인용하는 논문 사이에도 남은 질문이 있습니다. 분야 전체의 중요도 순위·미인용 판정·검증된 반박을 뜻하지 않습니다. 본문 근거가 부족한 P22–P23, P39–P41 비교 후보는 이번 목록에서 보류했습니다.</div>`);
+    A.openModal(`<div class="modal-eyebrow">EXISTING CORPUS / PAIRWISE QUESTIONS</div><h2>수록 논문 사이, 아직 남은 질문.</h2><p>공개 문헌 ${A.data.papers.filter(p=>!p.personal).length}편과 개인 문헌 ${A.data.papers.filter(p=>p.personal).length}편에서 ${A.data.questions.length}개 쟁점, ${A.data.questions.reduce((n,q)=>n+q.pairs.length,0)}개 논문 쌍을 비교합니다. 각 카드를 열고 두 논문만 확대해 보세요.</p>${categories.map(category=>`<h3 class="position-heading">${esc(category)}</h3><div class="frontier-grid">${A.data.questions.filter(q=>q.category===category).map(q=>`<button class="frontier-card" data-frontier="${q.id}"><span class="frontier-symbol">?</span><small>${esc(q.relationLabel)}</small><h3>${esc(q.title)}</h3><p>${esc(q.question)}</p><span>${q.pairs.map(p=>`${p.source} ↔ ${p.target}`).join(' / ')} ↗</span></button>`).join('')}</div>`).join('')}<div class="modal-note">점선 ? = 조건 차이를 판별하거나 방법을 연결할 추가 검증. 이미 인용하는 논문 사이에도 남은 질문이 있습니다. 분야 전체의 중요도 순위·미인용 판정·검증된 반박을 뜻하지 않습니다. 본문 근거가 부족한 P22–P23, P39–P41 비교 후보는 이번 목록에서 보류했습니다.</div>`);
   }
   document.addEventListener('click',e=>{
     const b=e.target.closest('button');if(!b)return;
     if(b.hasAttribute('data-personal-add'))openImport();
     if(b.hasAttribute('data-personal-manage'))manage();
+    if(b.hasAttribute('data-reviewed-list'))reviewedLibrary();
     if(b.hasAttribute('data-personal-export'))download(records(),'nand-atlas-personal-map.json');
     if(b.dataset.personalEdit){const r=records().records.find(r=>r.id===b.dataset.personalEdit);if(r)openImport(r);}
     if(b.dataset.personalFocus){$('#modal').close();A.focusPaper(b.dataset.personalFocus);}
-    if(b.dataset.personalRemove){const s=records();removed=s.records.find(p=>p.id===b.dataset.personalRemove);s.records=s.records.filter(p=>p.id!==b.dataset.personalRemove);if(s.focusId===b.dataset.personalRemove)s.focusId=null;try{C.write(s);A.reloadPersonal();manage();}catch(e){A.toast('저장소를 수정할 수 없습니다.');}}
+    if(b.dataset.personalRemove){const s=records();removed=s.records.find(p=>p.id===b.dataset.personalRemove);removedReview=s.review;s.records=s.records.filter(p=>p.id!==b.dataset.personalRemove);if(s.focusId===b.dataset.personalRemove)s.focusId=null;try{C.write(s);A.reloadPersonal();manage();}catch(e){A.toast('저장소를 수정할 수 없습니다.');}}
     if(b.dataset.personalPosition){const p=A.papers.get(b.dataset.personalPosition);if(p)showPosition(p);}
     if(b.hasAttribute('data-frontiers'))frontiers();
     if(b.dataset.frontier)showFrontier(b.dataset.frontier,Number(b.dataset.frontierPair)||0);
     if(b.dataset.frontierMap){const q=A.data.questions.find(q=>q.id===b.dataset.frontierMap);$('#modal').close();A.focusFrontier(q,Number(b.dataset.frontierPair)||0);}
   });
   $('#modal').addEventListener('close',()=>{epoch++;abort?.abort();draft=null;});
-  window.NAND_PERSONAL_UI={openImport,manage,showPosition,showFrontier,frontiers};
+  window.NAND_PERSONAL_UI={openImport,manage,showPosition,showFrontier,frontiers,reviewedLibrary};
 })();

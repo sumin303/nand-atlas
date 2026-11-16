@@ -63,13 +63,13 @@
     return {title:cleanMarkup(record.title?.[0]||''),authors:(record.author||[]).map(a=>text([a.given,a.family].filter(Boolean).join(' ')||a.name)).filter(Boolean),doi:normalizeDOI(record.DOI),venue:venueShort,year:(record.published||record['published-online']||record.issued)?.['date-parts']?.[0]?.[0]||'',abstract:cleanMarkup(record.abstract||''),bibliography:[venue,record.volume,record.issue?`(${record.issue})`:'',record.page?`pp. ${record.page}`:''].filter(Boolean).join(' · '),metadataProvider:'Crossref',references:(record.reference||[]).filter(r=>r.DOI).map(r=>{try{return normalizeDOI(r.DOI);}catch{return '';}}).filter(Boolean)};
   }
   const hash=value=>{let h=2166136261;for(const ch of value)h=Math.imul(h^ch.charCodeAt(0),16777619);return (h>>>0).toString(16).padStart(8,'0');};
-  const empty=()=>({version:1,records:[],focusId:null});
+  const empty=()=>({version:1,records:[],focusId:null,review:window.NAND_REVIEW?.empty()});
   function sanitize(input,D){
     const valid=new Set(D.concepts.map(c=>c.id)),title=text(input.title,700);if(!title)throw new Error('논문 제목이 필요합니다.');
     let doi='';if(input.doi)doi=normalizeDOI(input.doi);
     const topics=[...new Set((Array.isArray(input.topics)?input.topics:[]).filter(t=>valid.has(t)&&t!=='nand'))];if(!topics.length)throw new Error('분류를 하나 이상 선택해 주세요.');
     const year=Number(input.year);if(input.year&&(!Number.isInteger(year)||year<1800||year>new Date().getFullYear()+1))throw new Error('발행 연도를 확인해 주세요.');
-    const id='U'+hash(doi||title.toLowerCase());
+    const id=/^U[0-9a-f]{8}$/.test(input.id)?input.id:'U'+hash(doi||title.toLowerCase());
     const authors=(Array.isArray(input.authors)?input.authors:[]).map(a=>text(a,120)).filter(Boolean).slice(0,50);
     return {id,title,doi,authors:authors.length?authors:['저자 미확인'],year:year||0,venue:text(input.venue,140)||'기타',bibliography:text(input.bibliography,600),abstract:text(input.abstract,3500),topics,owned:input.owned===true,metadataProvider:['Crossref','직접 입력','PDF에서 추출'].includes(input.metadataProvider)?input.metadataProvider:'직접 입력',pdfRead:input.pdfRead===true,pagesRead:Math.max(0,Math.min(40,Number(input.pagesRead)||0)),totalPages:Math.max(0,Math.min(5000,Number(input.totalPages)||0)),notes:text(input.notes,1000),checkedAt:text(input.checkedAt,10)||new Date().toISOString().slice(0,10),classificationBasis:text(input.classificationBasis,1800)||'사용자가 분류를 검토했습니다.',references:(Array.isArray(input.references)?input.references:[]).slice(0,500).flatMap(d=>{try{return [normalizeDOI(d)];}catch{return [];}})};
   }
@@ -90,9 +90,11 @@
     let data;try{data=JSON.parse(storage.getItem(KEY)||'null')||empty();if(data.version!==1||!Array.isArray(data.records))throw Error();}catch{return {...empty(),warning:'개인 맵을 읽을 수 없습니다. 저장 파일을 확인해 주세요.'};}
     const records=[],seen=new Set();let dropped=0;
     for(const raw of data.records.slice(0,MAX)){try{const p=sanitize(raw,D);if(!seen.has(p.id)){records.push(p);seen.add(p.id);}}catch{dropped++;}}
-    return {version:1,records,focusId:seen.has(data.focusId)?data.focusId:null,warning:dropped?`${dropped}개 개인 항목의 형식을 확인할 수 없어 제외했습니다.`:''};
+    let review=window.NAND_REVIEW?.empty(),reviewWarning='';
+    try{if(window.NAND_REVIEW)review=window.NAND_REVIEW.sanitize(window.NAND_REVIEW.prune(data.review,new Set([...D.papers,...records].map(p=>p.id))),D,records);}catch{reviewWarning='일부 원문 검토 기록의 형식을 확인할 수 없습니다. 백업을 확인해 주세요.';}
+    return {version:1,records,review,focusId:seen.has(data.focusId)?data.focusId:null,warning:(dropped?`${dropped}개 개인 항목의 형식을 확인할 수 없어 제외했습니다. `:'')+reviewWarning};
   }
-  function write(data,storage=localStorage){storage.setItem(KEY,JSON.stringify({version:1,records:data.records,focusId:data.focusId}));}
+  function write(data,storage=localStorage){storage.setItem(KEY,JSON.stringify({version:1,records:data.records,focusId:data.focusId,review:data.review}));}
   function asPaper(r,D){
     const family=r.topics.includes('generative')?'generative':r.topics.includes('physics-ml')?'physics-ml':r.topics.includes('transfer')?'transfer':r.topics.includes('optimization')?'optimization':r.topics.includes('surrogate')?'learning':'analysis';
     const deviceScope=devices.filter(d=>r.topics.includes(d[0])).map(d=>d[2]).join(' · ');
@@ -105,13 +107,14 @@
   function merge(base,storage){
     const D=extend(base),personal=load(D,storage);D.personal=personal;
     for(const r of personal.records){if(r.doi&&D.papers.some(p=>p.doi?.toLowerCase()===r.doi))continue;D.papers.push(asPaper(r,D));}
+    D.questions=window.NAND_FRONTIERS||[];if(window.NAND_REVIEW)window.NAND_REVIEW.apply(D,personal.review);
     D.venues=[...new Set(D.papers.map(p=>p.venue))];
     const publicCorpus={...D,papers:D.papers.filter(p=>!p.personal)};
-    for(const p of D.papers.filter(p=>p.personal))for(const n of neighbors(p,publicCorpus).slice(0,3)){
+    for(const p of D.papers.filter(p=>p.personal&&!p.reviewed))for(const n of neighbors(p,publicCorpus).slice(0,3)){
       if(D.relations.some(r=>[r.source,r.target].includes(p.id)&&[r.source,r.target].includes(n.paper.id)))continue;
       D.relations.push({id:`candidate-${p.id}-${n.paper.id}`,source:p.id,target:n.paper.id,type:'hypothesis',status:'auto_candidate',checkedAt:p.checkedAt,shared:n.shared,note:`공통 방법론: ${n.shared.map(t=>D.concepts.find(c=>c.id===t)?.label).join(' · ')}. 소자·데이터·출력을 맞춘 비교를 검토할 후보입니다. 인용이나 반박은 미확인입니다.`,evidence:[]});
     }
-    D.questions=window.NAND_FRONTIERS||[];return D;
+    return D;
   }
   window.NAND_PERSONAL={KEY,MAX,devices,rules,methodIds,normalizeDOI,doiURL,extractDOIs,classify,crossref,extend,load,write,sanitize,merge,neighbors,asPaper,cleanMarkup};
 })();
