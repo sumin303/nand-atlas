@@ -75,6 +75,7 @@
   }
   function extend(D){
     D=JSON.parse(JSON.stringify(D));
+    const distribution=D.concepts.find(c=>c.id==='variability');if(distribution)distribution.parent='models';
     const first=D.papers.find(p=>p.id==='P26');if(first){first.highlight=false;first.graphLabel=first.graphLabel?.replace(/^★\s*/, '');}
     const root=D.concepts.find(c=>c.id==='nand');root.label='Device Research';root.ko='반도체 소자 연구';root.description='NAND를 출발점으로 소자와 공통 방법론을 교차 탐색합니다.';
     D.groups.devices={label:'소자 분야',color:'#d2b3d7'};
