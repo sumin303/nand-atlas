@@ -1,0 +1,24 @@
+.my-research-btn{display:flex;justify-content:space-between;align-items:center;width:100%;margin:16px 0 20px;padding:11px 13px;border:1px solid #8a754947;border-radius:6px;color:#e9c881;background:#e9c8810a;font-size:12px;text-align:left;cursor:pointer}
+.my-research-btn:hover{background:#e9c88117;border-color:#bfa064}
+.owned-preview{padding:17px 16px;margin:22px 0;border:1px solid #c9aa6355;border-left:3px solid #e9c881;border-radius:5px;background:linear-gradient(125deg,#e9c8810c,transparent)}
+.owned-preview .eyebrow{color:#e9c881;display:block;margin-bottom:12px;font-size:10px;letter-spacing:1.5px}
+.owned-preview strong{display:block;color:#e8d7ae;font-size:13px;line-height:1.8}
+.owned-preview p{font-size:12px;line-height:1.8;color:#b2bab3;margin:9px 0 12px}
+.owned-preview button{color:#e9c881;font-size:11px;text-align:left;line-height:1.7}
+.owned-badge,.review-badge{font-size:9px;padding:3px 6px;border:1px solid #bda77255;border-radius:3px;color:#e9c881}.review-badge{color:#adc2cf;border-color:#adc2cf44}
+.paper-card-top{flex-wrap:wrap;gap:7px}
+.coverage-list{margin:20px 0;border-top:1px solid #ffffff12}
+.coverage-row{display:flex;align-items:center;gap:12px;width:100%;padding:15px 0;border:0;border-bottom:1px solid #ffffff12;background:none;color:#b7c3bd;text-align:left;cursor:pointer}
+.coverage-row:hover{background:#ffffff04}.coverage-row>i{width:7px;height:7px;border-radius:50%;background:var(--topic-color);flex-shrink:0}
+.coverage-row>span:nth-child(2){flex:1}.coverage-row strong{font-size:12px;font-weight:500;color:#d0d7d0}.coverage-row small{display:block;color:#819087;font-size:10px;margin-top:6px}.coverage-row b{font-size:17px;font-weight:400;color:var(--topic-color)}
+.coverage-note{font-size:11px;line-height:1.9;color:#98a79d}.coverage-note strong{font-size:12px;color:#c8d0c8}.coverage-note p{margin:8px 0 15px}
+.position-heading{margin:30px 0 12px;font-size:15px;font-weight:500;color:#d4ddd5}.insight-card small{display:block;color:#81978a;font-size:10px;line-height:1.7;margin-top:14px}
+.graph-node.owned-node .node-core{fill:#e9c881;stroke:#fae4b2;stroke-width:2}.graph-node.owned-node .node-label{fill:#edd5a2;font-weight:600}.graph-node.owned-node .node-core+text{fill:#28251a!important}.graph-node.uncollected .node-core{fill:transparent;stroke-dasharray:2 2;opacity:.5}.graph-node.uncollected .node-label{opacity:.55}
+.tree-row .own-topic{color:#e9c881;font-size:9px;margin-left:5px}
+.research-brief>button{color:#e9c881;border-color:#b69d6333}.research-brief strong{letter-spacing:1px}
+.insight-card p,.modal-note{line-height:1.85}
+@media(min-width:1500px){.workspace{grid-template-columns:235px minmax(400px,1fr) 360px}}
+@media(max-width:650px){.my-research-btn{margin:10px 0}.research-brief{gap:10px}.research-brief strong{font-size:10px}.research-brief p{font-size:10px}.research-brief button{font-size:10px;padding:7px}.owned-preview{margin:16px 0}.coverage-row{padding:13px 0}}
+
+/* Original-verified ML neighborhood review */
+.review-links{display:flex;flex-wrap:wrap;gap:5px;margin:9px 0}.review-links .chip{font-size:10px;white-space:normal;text-align:left}.neighborhood-table th:first-child{width:26%}.neighborhood-table small{display:block;color:#8eaaa0;font-size:10px;line-height:1.7}.review-dates,.scope-note{padding:12px 14px;border-left:2px solid #b89d60;background:#24291f;font-size:11px;line-height:1.9;margin:14px 0}.scope-note{color:#c3ccba}.position-heading{margin-top:28px}.insight-card small{color:#8fab9b;font-size:10px;line-height:1.8}
