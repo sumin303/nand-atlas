@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101315">
+  <meta name="description" content="NAND 연구와 내 논문의 위치, 접근법, 직접 인용과 조건별 차이를 원문 근거와 함께 탐색하는 연구 지도.">
+  <title>NAND Atlas — Research, connected.</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./cluster.css">
+  <link rel="stylesheet" href="./evidence.css">
+  <link rel="stylesheet" href="./landscape.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#" aria-label="NAND Atlas 홈"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 8 16 4 26 10 23 25 10 28 6 8ZM6 8 23 25M16 4 10 28M6 8 26 10 10 28"/><circle cx="6" cy="8" r="2.6"/><circle cx="16" cy="4" r="2.6"/><circle cx="26" cy="10" r="2.6"/><circle cx="23" cy="25" r="2.6"/><circle cx="10" cy="28" r="2.6"/></svg><span>NAND<span class="brand-light">Atlas</span></span><span class="version">LAB / 01</span></a>
+  <nav class="main-nav" aria-label="화면 선택"><button data-view="map" class="active">연구 맵</button><button data-view="library">논문 라이브러리 <span>18</span></button></nav>
+  <div class="header-actions"><label class="dataset-control"><span class="sr-only">데이터 선택</span><select id="dataset-select"><option value="research">실제 논문 · NAND 전체</option><option value="demo">가상 예시 · Prototype</option></select></label><button id="about-btn" class="icon-btn" aria-label="맵 안내 및 데이터 원칙">?</button><button id="export-btn" class="subtle-btn"><span aria-hidden="true">↓</span> 데이터 내보내기</button></div>
+</header>
+<div class="workspace">
+  <aside class="sidebar" aria-label="주제 탐색 및 필터">
+    <div class="sidebar-heading"><span class="eyebrow">YOUR RESEARCH SPACE</span><div class="space-title">NAND Flash <span>↗</span></div><p>기술의 흐름을 따라, 연구를 연결하다.</p></div>
+    <label class="search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg><input id="search" type="search" placeholder="개념 또는 논문 검색" autocomplete="off"><kbd>/</kbd></label>
+    <div id="search-results" class="search-results" hidden></div>
+    <button id="my-research-btn" class="my-research-btn">★ 내 연구 위치 <span>↗</span></button>
+    <div class="section-label">EXPLORE <span>연구 주제</span></div>
+    <nav id="topic-tree" class="topic-tree" aria-label="개념 트리"></nav>
+    <div class="filter-heading"><span class="section-label">CONNECTIONS</span><button id="reset-filters" class="text-btn">초기화</button></div>
+    <div id="relation-filters" class="relation-filters"></div>
+    <div class="section-label venue-heading">PUBLICATIONS <span>학회 · 저널</span></div>
+    <div id="venue-filters" class="venue-filters"></div>
+    <label id="evidence-filter-wrap" class="evidence-filter">확인 범위<select id="evidence-filter"><option value="all">전체 확인 범위</option><option value="publisher">IEEE 직접 본문 확인</option><option value="original">본문 확인 (PDF + 텍스트)</option><option value="pdf">PDF·그림 확인만</option><option value="abstract">초록 확인만</option></select></label>
+    <div class="mobile-tools"><button id="mobile-filters" aria-expanded="false">필터 펼치기 +</button><button id="mobile-export">JSON 내보내기 ↓</button></div>
+    <div class="sidebar-footer"><span class="status-dot"></span><div>탐색을 위한 첫 번째 지도<small>실제 논문 수집 전 · 데이터 v0.1</small></div></div>
+  </aside>
+  <main class="main">
+    <section id="map-view" class="map-view" aria-label="인터랙티브 연구 맵">
+      <div class="map-heading"><div class="breadcrumb">NAND ATLAS <span>/</span> RESEARCH MAP</div><div class="map-title-row"><div><h1>연결에서 발견하는 다음 질문<span>.</span></h1><p>개념을 선택하고, 같은 문제를 바라보는 서로 다른 접근을 살펴보세요.</p></div><div class="view-switch" role="group" aria-label="그래프 종류"><button data-mode="concept" class="active">개념 맵</button><button data-mode="papers">논문 관계망</button></div></div></div>
+      <div id="research-brief" class="research-brief"></div>
+      <div class="graph-toolbar"><button id="cluster-back" class="cluster-back" hidden>← 전체 맵</button><div id="graph-count" class="graph-count" aria-live="polite"></div><span id="cluster-caption" hidden>접근법별 편집 군집</span><label class="toggle-label"><input type="checkbox" id="focus-toggle"><span class="switch"></span>선택 주제에 집중</label></div>
+      <div id="graph-stage" class="graph-stage"><svg id="graph" role="group" aria-label="NAND 연구 그래프. 노드를 클릭하거나 Tab 키로 선택하세요."><defs><pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".7" fill="#353d3c"/></pattern><marker id="arrow-cites" markerWidth="7" markerHeight="7" refX="15" refY="3.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3.5 L0,7" fill="#a0aba9"/></marker><marker id="arrow-extends" markerWidth="7" markerHeight="7" refX="15" refY="3.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3.5 L0,7" fill="#7bbfac"/></marker></defs><rect width="100%" height="100%" fill="url(#dots)" opacity=".48"/><g id="graph-world"></g></svg><div id="graph-tooltip" role="tooltip" hidden></div><div class="graph-empty" id="graph-empty" hidden><strong>조건에 맞는 논문이 없습니다</strong><span>출판물 필터를 다시 선택해 보세요.</span></div><div class="graph-bottom"><div class="graph-hint"><span>✥</span> 드래그로 이동 <b>·</b> 스크롤로 확대 <b>·</b> 점을 눌러 탐색</div><div class="zoom-controls"><button id="zoom-out" aria-label="축소">−</button><span id="zoom-level">100%</span><button id="zoom-in" aria-label="확대">+</button><span class="divider"></span><button id="fit" aria-label="그래프 전체 보기">⊡</button></div></div></div>
+      <div class="map-footer"><span><i></i> 노드 = 개념 / 연구 질문</span><span>계층은 실선, 개념 간 연결은 점선</span><button id="guide-btn">지도를 읽는 방법 <span>↗</span></button></div>
+    </section>
+    <section id="library-view" class="library-view" hidden aria-label="가상 논문 라이브러리"><div class="breadcrumb">NAND ATLAS <span>/</span> PAPER LIBRARY</div><h1>아이디어를 한곳에<span>.</span></h1><p class="muted">가상 논문 18편으로 탐색 구조를 시험합니다. 실제 논문 목록이 아닙니다.</p><div class="library-tools"><label>정렬 <select id="sort-papers"><option value="newest">예시 연도 최신순</option><option value="oldest">예시 연도 오래된순</option><option value="title">제목순</option></select></label><label><input type="checkbox" id="saved-only"> 저장한 논문만</label><span id="library-count"></span></div><div id="library-grid" class="library-grid"></div></section>
+  </main>
+  <aside id="inspector" class="inspector" aria-label="선택 항목 상세"></aside>
+</div>
+<div id="compare-tray" class="compare-tray" hidden><span><b id="compare-count">0</b>편 선택됨</span><div id="compare-titles"></div><button id="compare-open" class="primary-btn">접근법 비교 <span>↗</span></button><button id="compare-clear" class="icon-btn" aria-label="비교 선택 초기화">×</button></div>
+<dialog id="modal"><div id="modal-content"></div><button id="modal-close" class="modal-close icon-btn" aria-label="대화상자 닫기">×</button></dialog>
+<div id="toast" class="toast" role="status"></div>
+<script src="./data.js"></script><script src="./retention-data.js"></script><script src="./landscape-data.js"></script><script src="./ml-neighborhood-data.js"></script><script src="./cluster-layout.js"></script><script src="./app.js"></script>
+</body></html>
