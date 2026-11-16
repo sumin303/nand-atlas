@@ -1,24 +1,32 @@
-# NAND Atlas — private migration
+# NAND Atlas — personal research bibliography
 
-Prepared from the verified 32-paper / 55-relation map.
+소자 연구 문헌을 서지 정보·연구 질문·방법론·원문 근거로 탐색하는 개인 논문 라이브러리입니다.
+현재 32편의 실제 문헌, 37개 개념, 55개 근거 연결을 수록합니다.
 
-The GitHub repository is https://github.com/sumin303/nand-atlas and is private.
-The website migration has NOT been deployed.
-GitHub Pages publishing is intentionally absent. `.openai` and the former Git history are excluded.
+## 데이터와 원문
 
-## Pending account setup
+- 논문별 제목·저자·연도·학회/저널·DOI, 요약, 비교 조건, 원문 근거 위치를 저장합니다.
+- DOI 버튼은 출판사 논문 페이지를 새 탭에서 엽니다. 본문 열람은 해당 사이트의 공개 여부와 개인/기관 구독 권한에 따릅니다.
+- 출판 PDF, 사용자가 제공한 PDF, 원문 추출 전문은 저장소에 포함하지 않습니다.
+- 생성형 AI·전이학습·물리 기반 학습·최적화 등 방법론 이웃에는 NAND 외 소자 논문도 포함합니다.
+- 한 논문에 여러 주제 태그를 연결합니다. 방법론의 공통점과 실제 참고문헌 인용을 구별합니다.
+- 원문이 확인되지 않은 관계를 DOI나 제목만으로 자동 생성하지 않습니다.
+- 북마크는 해당 브라우저에 저장합니다. 계정 간 동기화나 PDF 업로드 기능은 아직 없습니다.
 
-1. Upload the prepared source to the private GitHub repository.
-2. Sign in to Cloudflare; configure an email authentication provider and an Access Allow policy for the single owner email supplied in the conversation.
-3. Protect production, all preview aliases, and any custom domain. The Pages preview-only toggle does not protect the production URL.
-4. Configure and validate origin-side JWT verification before uploading the real map. Missing configuration must deny access.
-5. Connect only this repository, configure validation and `dist` output, and disable Functions fail-open.
-6. Verify anonymous requests to the homepage and JS/data assets are blocked, then verify owner authentication. Publish only after the private boundary is established.
+## 확장과 배포
 
-No Cloudflare account, email allowlist, token, deployment, or access policy has been created by this preparation. Do not treat this folder as an authenticated deployment yet.
+`dist/`의 정적 사이트는 GitHub Pages에서 실행할 수 있습니다. 공개 배포 시 서지·요약·연구 위치 분석과 코드가 공개됩니다.
+비공개 저장소를 유지한 현재 상태에서는 아직 GitHub Pages가 활성화되지 않았습니다.
+배포 설정 후 main 브랜치 수정 → 자동 검증 → 배포로 같은 주소를 업데이트합니다.
 
-## Local checks
+소자 축과 방법론 축을 여러 태그로 연결하는 방식으로 다른 메모리·트랜지스터 분야까지 확장할 수 있습니다.
+현재 화면은 NAND를 중심으로 구성되어 있습니다.
 
-`node scripts/validate.mjs`
+## 로컬 실행 및 검사
 
-The existing ChatGPT-hosted private site is unchanged.
+```sh
+node scripts/serve.mjs
+npm run check
+```
+
+현재 Sites의 기존 비공개 웹사이트는 별도로 유지됩니다.
