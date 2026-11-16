@@ -75,6 +75,7 @@
   }
   function extend(D){
     D=JSON.parse(JSON.stringify(D));
+    const first=D.papers.find(p=>p.id==='P26');if(first){first.highlight=false;first.graphLabel=first.graphLabel?.replace(/^★\s*/, '');}
     const root=D.concepts.find(c=>c.id==='nand');root.label='Device Research';root.ko='반도체 소자 연구';root.description='NAND를 출발점으로 소자와 공통 방법론을 교차 탐색합니다.';
     D.groups.devices={label:'소자 분야',color:'#d2b3d7'};
     D.concepts.push({id:'devices',parent:'nand',group:'devices',label:'Device families',ko:'소자 분야',x:-90,y:320,description:'서로 다른 소자를 공통 방법론으로 연결합니다.',question:'같은 방법론을 다른 소자에 적용하면 어떤 조건을 다시 검증해야 할까?'});
