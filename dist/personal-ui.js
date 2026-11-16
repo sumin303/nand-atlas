@@ -106,14 +106,14 @@
   async function importJSON(event){
     const file=event.target.files?.[0];if(!file)return;
     try{
-      if(file.size>2*1024*1024)throw Error('2 MB 이하의 개인 맵 JSON을 선택해 주세요.');
+      if(file.size>8*1024*1024)throw Error('8 MB 이하의 개인 맵 JSON을 선택해 주세요.');
       const incoming=JSON.parse(await file.text());if(incoming.version!==1||!Array.isArray(incoming.records))throw Error('개인 맵 내보내기로 만든 JSON이 아닙니다.');
       if(incoming.records.length>C.MAX)throw Error(`최대 ${C.MAX}편까지 가져올 수 있습니다.`);
       const D=base(),clean=incoming.records.map(p=>C.sanitize(p,D)),store=records();let count=0;
       for(const p of clean){if(store.records.some(r=>r.id===p.id)||D.papers.some(r=>p.doi&&r.doi?.toLowerCase()===p.doi))continue;store.records.push(p);count++;}
       if(store.records.length>C.MAX)throw Error(`합계 ${C.MAX}편을 초과합니다. 저장된 항목을 정리해 주세요.`);
       C.write(store);A.reloadPersonal();manage();$('#personal-status').textContent=`${count}편을 가져왔습니다. 같은 DOI·항목은 중복 추가하지 않았습니다. 관계는 미검토 후보로 다시 계산합니다.`;
-    }catch(e){$('#personal-status').textContent=`가져오지 않았습니다: ${e.message}`;}
+    }catch(e){$('#personal-status').textContent=e.name==='QuotaExceededError'?'브라우저 저장 공간이 부족하여 가져오지 않았습니다. 기존 개인 맵은 유지됩니다. JSON을 보관하고 더 작은 묶음으로 가져오세요.':`가져오지 않았습니다: ${e.message}`;}
   }
   function showPosition(p){
     const ns=C.neighbors(p,A.data),qs=(A.data.questions||[]).filter(q=>q.topics.some(t=>p.topics.includes(t)));

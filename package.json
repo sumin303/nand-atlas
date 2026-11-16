@@ -1,10 +1,10 @@
 {
   "name": "nand-atlas",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "description": "Evidence-linked NAND research landscape and personal paper placement",
   "scripts": {
     "start": "node scripts/serve.mjs",
-    "check": "node --check dist/app.js && node --check dist/data.js && node --check dist/retention-data.js && node --check dist/landscape-data.js && node --check dist/cluster-layout.js && node --check dist/ml-neighborhood-data.js && node --check dist/personal-core.js && node --check dist/personal-ui.js && node --check dist/frontiers-data.js && node --check dist/frontier-layout.js && node scripts/validate.mjs && node scripts/validate-personal.mjs"
+    "check": "node --check dist/app.js && node --check dist/data.js && node --check dist/retention-data.js && node --check dist/landscape-data.js && node --check dist/cluster-layout.js && node --check dist/ml-neighborhood-data.js && node --check dist/personal-core.js && node --check dist/personal-ui.js && node --check dist/frontiers-data.js && node --check dist/frontier-layout.js && node scripts/validate.mjs && node scripts/validate-personal.mjs && node --check dist/hierarchy-layout.js && node scripts/validate-hierarchy.mjs"
   }
 }

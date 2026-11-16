@@ -1,7 +1,7 @@
 /* Browser-local bibliography. Suggestions are not verified citations or contradictions. */
 (() => {
   'use strict';
-  const KEY='nand-atlas-personal-v1', MAX=300;
+  const KEY='nand-atlas-personal-v1', MAX=3000;
   const devices=[
     ['device-nand','NAND','NAND Flash',/\bnand\b/i],
     ['device-finfet','FinFET / GAA','FinFET · GAA · nanosheet',/finfet|gate.all.around|\bgaa\b|nanosheet|nanowire/i],
@@ -13,7 +13,7 @@
     ['device-other','Other / review','기타 소자 · 분류 검토',null]
   ];
   const rules=[
-    ['generative','생성형 AI',/generative|diffusion|\bddpm\b|\bwgan\b|adversarial network|variational autoencoder|\bvae\b|합성 데이터|생성형/gi],
+    ['generative','생성형 AI',/generative|(?:conditional|denoising|probabilistic|latent|score.based) diffusion|diffusion (?:probabilistic|generative)|\bddpm\b|\bwgan\b|adversarial network|variational autoencoder|\bvae\b|합성 데이터|생성형/gi],
     ['transfer','전이학습',/transfer learning|domain adapt|fine.tun|pre.train|전이학습|미세조정/gi],
     ['small-data','소량 데이터',/limited data|small.data|sparse.data|data.scare|data.scarc|few.shot|소량 데이터|데이터 부족/gi],
     ['surrogate','학습 기반 모델링',/machine learning|neural network|surrogate|deep learning|\bmlp\b|신경망|머신러닝/gi],
@@ -29,7 +29,7 @@
     ['ispp','ISPP',/\bispp\b|incremental.step.pulse/gi],
     ['program','Programming',/programming|program pulse|프로그램 동작/gi],
     ['erase','Erase',/\berase\b|소거/gi],
-    ['3d','3D NAND',/3.d.{0,12}nand|vertical.{0,12}nand/gi],
+    ['3d','3D NAND',/3[\s-]?d.{0,12}nand|vertical.{0,12}nand|\bv[\s-]?nand\b/gi],
     ['ctn','Charge-trap NAND',/charge.trap.{0,20}nand|\bctn\b/gi],
     ['fg','Floating gate',/floating.gate/gi]
   ];
@@ -95,7 +95,7 @@
   function asPaper(r,D){
     const family=r.topics.includes('generative')?'generative':r.topics.includes('physics-ml')?'physics-ml':r.topics.includes('transfer')?'transfer':r.topics.includes('optimization')?'optimization':r.topics.includes('surrogate')?'learning':'analysis';
     const deviceScope=devices.filter(d=>r.topics.includes(d[0])).map(d=>d[2]).join(' · ');
-    return {...r,personal:true,shortTitle:r.title.slice(0,55),graphLabel:r.title.slice(0,38),family,approach:family==='analysis'?'분류 검토 · 개인 문헌':D.concepts.find(c=>c.id===r.topics.find(t=>methodIds.has(t)))?.label||'방법론 분류',scope:r.topics.includes('device-nand')?'nand':'method_neighbor',deviceScope,summary:r.abstract||'서지정보를 추가했습니다. 초록이나 연구 메모를 보완하면 배치를 검토할 수 있습니다.',problem:r.notes||'연구 질문은 아직 원문에서 검토하지 않았습니다.',method:r.classificationBasis,finding:'자동으로 결과·성능 우열을 판단하지 않습니다. 원문을 검토한 뒤 비교 내용을 보완하세요.',conditions:'소자, 데이터 수, 학습·시험 분리, 출력, 평가 지표를 확인해야 합니다.',limitation:'분류는 제목·초록·추출된 텍스트의 키워드와 사용자의 선택을 바탕으로 합니다. 인용·반박·독창성은 자동 검증하지 않았습니다.',verification:{level:'metadata',label:r.pdfRead?'PDF 텍스트 추출 · 미검토':`${r.metadataProvider} 서지 · 미검토`,detail:r.pdfRead?`브라우저에서 ${r.pagesRead}/${r.totalPages}쪽의 텍스트를 추출했습니다. 그림·표 해석이나 원문 주장 검증을 수행한 상태는 아닙니다. PDF와 전문은 저장하거나 전송하지 않습니다.`:'서지정보와 분류를 저장했습니다. 본문 근거 확인과 구별됩니다.'},publisherVerified:false,sourceUrl:r.doi?doiURL(r.doi):'',sourceLabel:'출판사 논문 페이지',metadataUrl:r.doi&&r.metadataProvider==='Crossref'?`https://api.crossref.org/works/${encodeURIComponent(r.doi)}`:'',evidence:[]};
+    return {...r,personal:true,shortTitle:r.title.slice(0,55),graphLabel:r.title.slice(0,38),family,approach:family==='analysis'?'분류 검토 · 개인 문헌':D.concepts.find(c=>c.id===r.topics.find(t=>methodIds.has(t)))?.label||'방법론 분류',scope:r.topics.includes('device-nand')?'nand':'method_neighbor',deviceScope,summary:r.abstract||'서지정보를 추가했습니다. 초록이나 연구 메모를 보완하면 배치를 검토할 수 있습니다.',problem:r.notes||'연구 질문은 아직 원문에서 검토하지 않았습니다.',method:r.classificationBasis,finding:'자동으로 결과·성능 우열을 판단하지 않습니다. 원문을 검토한 뒤 비교 내용을 보완하세요.',conditions:'소자, 데이터 수, 학습·시험 분리, 출력, 평가 지표를 확인해야 합니다.',limitation:'분류는 제목·초록·추출된 텍스트의 키워드와 사용자의 선택을 바탕으로 합니다. 인용·반박·독창성은 자동 검증하지 않았습니다.',verification:{level:'metadata',label:r.pdfRead?'PDF 텍스트 추출 · 미검토':`${r.metadataProvider} 서지 · 미검토`,detail:r.pdfRead?`로컬에서 ${r.pagesRead}/${r.totalPages}쪽의 텍스트를 추출했습니다. 그림·표 해석이나 원문 주장 검증을 수행한 상태는 아닙니다. PDF와 전문은 저장하거나 전송하지 않습니다.`:'서지정보와 분류를 저장했습니다. 본문 근거 확인과 구별됩니다.'},publisherVerified:false,sourceUrl:r.doi?doiURL(r.doi):'',sourceLabel:'출판사 논문 페이지',metadataUrl:r.doi&&r.metadataProvider==='Crossref'?`https://api.crossref.org/works/${encodeURIComponent(r.doi)}`:'',evidence:[]};
   }
   function neighbors(p,D){
     const methods=p.topics.filter(t=>methodIds.has(t));
@@ -105,7 +105,8 @@
     const D=extend(base),personal=load(D,storage);D.personal=personal;
     for(const r of personal.records){if(r.doi&&D.papers.some(p=>p.doi?.toLowerCase()===r.doi))continue;D.papers.push(asPaper(r,D));}
     D.venues=[...new Set(D.papers.map(p=>p.venue))];
-    for(const p of D.papers.filter(p=>p.personal))for(const n of neighbors(p,D).slice(0,3)){
+    const publicCorpus={...D,papers:D.papers.filter(p=>!p.personal)};
+    for(const p of D.papers.filter(p=>p.personal))for(const n of neighbors(p,publicCorpus).slice(0,3)){
       if(D.relations.some(r=>[r.source,r.target].includes(p.id)&&[r.source,r.target].includes(n.paper.id)))continue;
       D.relations.push({id:`candidate-${p.id}-${n.paper.id}`,source:p.id,target:n.paper.id,type:'hypothesis',status:'auto_candidate',checkedAt:p.checkedAt,shared:n.shared,note:`공통 방법론: ${n.shared.map(t=>D.concepts.find(c=>c.id===t)?.label).join(' · ')}. 소자·데이터·출력을 맞춘 비교를 검토할 후보입니다. 인용이나 반박은 미확인입니다.`,evidence:[]});
     }

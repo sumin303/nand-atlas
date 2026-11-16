@@ -7,11 +7,12 @@
   <meta name="description" content="NAND 연구와 내 논문의 위치, 접근법, 직접 인용과 조건별 차이를 원문 근거와 함께 탐색하는 연구 지도.">
   <title>NAND Atlas — Research, connected.</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=0.7.0">
-  <link rel="stylesheet" href="./cluster.css?v=0.7.0">
-  <link rel="stylesheet" href="./evidence.css?v=0.7.0">
-  <link rel="stylesheet" href="./landscape.css?v=0.7.0">
-  <link rel="stylesheet" href="./personal.css?v=0.7.0">
+  <link rel="stylesheet" href="./style.css?v=0.8.0">
+  <link rel="stylesheet" href="./cluster.css?v=0.8.0">
+  <link rel="stylesheet" href="./evidence.css?v=0.8.0">
+  <link rel="stylesheet" href="./landscape.css?v=0.8.0">
+  <link rel="stylesheet" href="./personal.css?v=0.8.0">
+  <link rel="stylesheet" href="./hierarchy.css?v=0.8.0">
 </head>
 <body>
 <header class="topbar">
@@ -42,7 +43,8 @@
     <section id="map-view" class="map-view" aria-label="인터랙티브 연구 맵">
       <div class="map-heading"><div class="breadcrumb">NAND ATLAS <span>/</span> RESEARCH MAP</div><div class="map-title-row"><div><h1>연결에서 발견하는 다음 질문<span>.</span></h1><p>개념을 선택하고, 같은 문제를 바라보는 서로 다른 접근을 살펴보세요.</p></div><div class="view-switch" role="group" aria-label="그래프 종류"><button data-mode="concept" class="active">개념 맵</button><button data-mode="papers">논문 관계망</button></div></div></div>
       <div id="research-brief" class="research-brief"></div>
-      <div class="graph-toolbar"><button id="cluster-back" class="cluster-back" hidden>← 전체 맵</button><div id="graph-count" class="graph-count" aria-live="polite"></div><span id="cluster-caption" hidden>접근법별 편집 군집</span><label class="toggle-label"><input type="checkbox" id="focus-toggle"><span class="switch"></span>선택 주제에 집중</label></div>
+      <div class="graph-toolbar"><button id="cluster-back" class="cluster-back" hidden>← 전체 맵</button><div id="graph-count" class="graph-count" aria-live="polite"></div><nav id="graph-pages" class="graph-pages" aria-label="논문 묶음 이동" hidden><button id="graph-prev" aria-label="이전 논문 묶음">‹</button><span id="graph-page-label"></span><button id="graph-next" aria-label="다음 논문 묶음">›</button></nav><span id="cluster-caption" hidden>접근법별 편집 군집</span><label class="toggle-label"><input type="checkbox" id="focus-toggle"><span class="switch"></span>선택 주제에 집중</label></div>
+      <nav id="map-path" class="map-path" aria-label="현재 연구 경로"></nav>
       <div id="graph-stage" class="graph-stage"><svg id="graph" role="group" aria-label="NAND 연구 그래프. 노드를 클릭하거나 Tab 키로 선택하세요."><defs><pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".7" fill="#353d3c"/></pattern><marker id="arrow-cites" markerWidth="7" markerHeight="7" refX="15" refY="3.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3.5 L0,7" fill="#a0aba9"/></marker><marker id="arrow-extends" markerWidth="7" markerHeight="7" refX="15" refY="3.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3.5 L0,7" fill="#7bbfac"/></marker></defs><rect width="100%" height="100%" fill="url(#dots)" opacity=".48"/><g id="graph-world"></g></svg><div id="graph-tooltip" role="tooltip" hidden></div><div class="graph-empty" id="graph-empty" hidden><strong>조건에 맞는 논문이 없습니다</strong><span>출판물 필터를 다시 선택해 보세요.</span></div><div class="graph-bottom"><div class="graph-hint"><span>✥</span> 드래그로 이동 <b>·</b> 스크롤로 확대 <b>·</b> 점을 눌러 탐색</div><div class="zoom-controls"><button id="zoom-out" aria-label="축소">−</button><span id="zoom-level">100%</span><button id="zoom-in" aria-label="확대">+</button><span class="divider"></span><button id="fit" aria-label="그래프 전체 보기">⊡</button></div></div></div>
       <div class="map-footer"><span><i></i> 노드 = 개념 / 연구 질문</span><span>계층은 실선, 개념 간 연결은 점선</span><button id="guide-btn">지도를 읽는 방법 <span>↗</span></button></div>
     </section>
@@ -53,5 +55,5 @@
 <div id="compare-tray" class="compare-tray" hidden><span><b id="compare-count">0</b>편 선택됨</span><div id="compare-titles"></div><button id="compare-open" class="primary-btn">접근법 비교 <span>↗</span></button><button id="compare-clear" class="icon-btn" aria-label="비교 선택 초기화">×</button></div>
 <dialog id="modal"><div id="modal-content"></div><button id="modal-close" class="modal-close icon-btn" aria-label="대화상자 닫기">×</button></dialog>
 <div id="toast" class="toast" role="status"></div>
-<script src="./data.js?v=0.7.0"></script><script src="./retention-data.js?v=0.7.0"></script><script src="./landscape-data.js?v=0.7.0"></script><script src="./ml-neighborhood-data.js?v=0.7.0"></script><script src="./frontiers-data.js?v=0.7.0"></script><script src="./personal-core.js?v=0.7.0"></script><script src="./cluster-layout.js?v=0.7.0"></script><script src="./frontier-layout.js?v=0.7.0"></script><script src="./app.js?v=0.7.0"></script><script src="./personal-ui.js?v=0.7.0"></script>
+<script src="./data.js?v=0.8.0"></script><script src="./retention-data.js?v=0.8.0"></script><script src="./landscape-data.js?v=0.8.0"></script><script src="./ml-neighborhood-data.js?v=0.8.0"></script><script src="./frontiers-data.js?v=0.8.0"></script><script src="./personal-core.js?v=0.8.0"></script><script src="./cluster-layout.js?v=0.8.0"></script><script src="./frontier-layout.js?v=0.8.0"></script><script src="./hierarchy-layout.js?v=0.8.0"></script><script src="./app.js?v=0.8.0"></script><script src="./personal-ui.js?v=0.8.0"></script>
 </body></html>
