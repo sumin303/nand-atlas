@@ -1,10 +1,10 @@
 # NAND Atlas — personal research bibliography
 
 소자 연구 문헌을 서지 정보·연구 질문·방법론·원문 근거로 탐색하는 개인 논문 라이브러리입니다.
-공개 맵에는 기존 32편과 추가 수집 문헌 156편을 합한 188편, 46개 개념, 89개 근거 연결과 29개 논문 쌍에 대한 23개의 연구 질문을 수록합니다. 추가 156편 중 13편은 원문 검토(2쪽 학회 요약 1편 포함)를 마쳤으며, 나머지 143편은 서지·주제 분류만 등록되어 있습니다.
+공개 맵에는 기존 32편, 추가 수집 문헌 156편과 새로 찾은 문헌 12편을 합한 200편, 46개 개념, 116개 근거 연결과 41개 논문 쌍에 대한 32개의 연구 질문을 수록합니다. 추가 156편 중 13편은 원문 검토(2쪽 학회 요약 1편 포함)를 마쳤으며, 나머지 143편은 서지·주제 분류만 등록되어 있습니다.
 개인 맵에는 DOI·PDF로 논문을 추가할 수 있습니다.
 
-[전체 맵 열기](https://sumin303.github.io/nand-atlas/?v=0.10.0#topic=nand&view=overview) · [Retention 비교 질문](https://sumin303.github.io/nand-atlas/?v=0.10.0#topic=nand&view=frontier&issue=gap-retention-pattern-boundary&pair=0)
+[전체 맵 열기](https://sumin303.github.io/nand-atlas/?v=0.11.0#topic=nand&view=overview) · [Retention 비교 질문](https://sumin303.github.io/nand-atlas/?v=0.11.0#topic=nand&view=frontier&issue=gap-retention-pattern-boundary&pair=0)
 
 ## 단계별 연구 맵
 
@@ -74,4 +74,17 @@ npm run check
 
 `dist/public-library-data.js`에는 공개 반영을 요청받은 156편의 서지·주제 분류와 검토 요약, 17개 직접 인용, 17개 접근·조건 비교, 12개 검증할 질문이 포함됩니다. PDF·추출 전문·저자 초록 전문·개인 메모·로컬 경로는 포함하지 않습니다. DOI가 없는 문헌도 안정된 ID로 중복을 방지합니다. 기존 개인 보관본과 메모는 브라우저에 남지만 같은 문헌·연결·질문을 맵에 중복 표시하지 않습니다. 공개 묶음의 작성 논문 표시는 추가하지 않으며, 기존 P26만 작성 논문입니다.
 
-새 브라우저에서도 가져오기 없이 188편과 공개 원문 검토를 볼 수 있습니다. 이후 DOI·PDF로 추가하는 문헌은 계속 개인 맵에 저장되며 자동 공개되지 않습니다.
+새 브라우저에서도 가져오기 없이 200편과 공개 원문 검토를 볼 수 있습니다. 이후 DOI·PDF로 추가하는 문헌은 계속 개인 맵에 저장되며 자동 공개되지 않습니다.
+
+## 다른 저널·학회로 확장 (2026-11-17)
+
+`dist/expansion-data.js`에 원문을 검토한 12편(NAND 6편 + 공통 방법론 6편)을 추가했습니다. **새로 찾은 문헌 12편** 버튼에서 이번 묶음과 연결 질문을 바로 볼 수 있습니다.
+
+- NAND: Solid-State Electronics, JEDS, Journal of Computational Electronics, IRPS, POMACS, HPCA.
+- 공통 방법론: Scientific Reports, Micromachines, ICML, ICLR, npj Computational Materials, Nature Communications.
+- 새 직접 인용 16개, 접근·조건 비교 11개, 검증 질문 9개(논문 쌍 12개). 확인된 모순은 추가하지 않았습니다.
+- 11편은 출판사·저자 공개 PDF, 1편은 공식 OA 전체 XML와 그림을 검토했습니다. Nature Communications 정정문도 반영했습니다. 판본과 확인 범위는 개별 카드에 표시합니다.
+
+두 일반 ML 방법론 논문은 NAND에서 검증된 결과로 분류하지 않습니다. npj 논문과 기존 EDTM 요약은 같은 연구 계열이며 독립 재현으로 세지 않습니다. P26의 기존 동결 레이어 비교를 반영해 후속 질문은 새로운 구조군·데이터 수에서 선택 규칙을 검증하는 것으로 정리했습니다.
+
+추가 공개 검토는 기존 13편과 새 12편을 합한 25편입니다. 기존 원문 미검토 143편의 상태는 그대로 표시합니다. 원문 PDF·전체 텍스트·개인 메모·로컬 경로는 공개 묶음에 없습니다.

@@ -19,7 +19,7 @@
     if((input.papers?.length||0)>1000||(input.relations?.length||0)>6000||(input.questions?.length||0)>1000)throw Error('검토 묶음의 항목 수가 너무 많습니다.');
     const papers=(input.papers||[]).map(p=>{
       const pid=paperId(p.id);if(!personal.has(pid))throw Error('개인 문헌의 원문 검토만 가져올 수 있습니다.');
-      const out={id:pid,checkedAt:date(p.checkedAt),shortTitle:str(p.shortTitle,70),documentType:p.documentType==='conference_extended_abstract'?'conference_extended_abstract':'paper',verificationDetail:str(p.verificationDetail,4000),evidence:evidence(p.evidence)};
+      const out={id:pid,checkedAt:date(p.checkedAt),shortTitle:str(p.shortTitle,70),documentType:p.documentType==='conference_extended_abstract'?'conference_extended_abstract':'paper',verificationLevel:p.verificationLevel==='text'?'text':'pdf',verificationDetail:str(p.verificationDetail,4000),evidence:evidence(p.evidence)};
       for(const k of ['summary','problem','method','finding','conditions','limitation']){out[k]=str(p[k],6000);if(!out[k])throw Error(`${pid}의 ${k} 검토 내용이 필요합니다.`);}
       if(!out.verificationDetail)throw Error('원문 확인 범위가 필요합니다.');return out;
     });
@@ -47,7 +47,7 @@
   function combine(oldReview,incoming){const a=oldReview||empty(),b=incoming||empty();if(a.version!==1||b.version!==1)throw Error('지원하지 않는 원문 검토 형식입니다.');const merge=k=>[...new Map([...(a[k]||[]),...(b[k]||[])].map(x=>[x.id,x])).values()];return {version:1,papers:merge('papers'),relations:merge('relations'),questions:merge('questions')};}
   function prune(review,ids){const r=review||empty();return {version:1,papers:r.papers.filter(p=>ids.has(p.id)),relations:r.relations.filter(x=>ids.has(x.source)&&ids.has(x.target)),questions:r.questions.filter(q=>q.paperIds.every(id=>ids.has(id)))};}
   function apply(D,review,options={}){
-    for(const r of review.papers){const p=D.papers.find(p=>p.id===r.id);if(!p||p.publicReview&&!options.public)continue;const brief=r.documentType==='conference_extended_abstract';Object.assign(p,{...r,reviewed:true,publicReview:options.public===true,verification:{level:brief?'abstract':'pdf',label:(options.public?'공개 ':'개인 ')+(brief?'학회요약 검토':'원문 검토'),detail:r.verificationDetail},publisherVerified:false});}
+    for(const r of review.papers){const p=D.papers.find(p=>p.id===r.id);if(!p||p.publicReview&&!options.public)continue;const brief=r.documentType==='conference_extended_abstract';Object.assign(p,{...r,reviewed:true,publicReview:options.public===true,verification:{level:brief?'abstract':r.verificationLevel==='text'?'text':'pdf',label:(options.public?'공개 ':'개인 ')+(brief?'학회요약 검토':'원문 검토'),detail:r.verificationDetail},publisherVerified:false});}
     D.relations.push(...review.relations.filter(r=>!D.relations.some(x=>x.source===r.source&&x.target===r.target&&x.type===r.type)));
     for(const p of D.papers.filter(p=>p.reviewed)){if(p.shortTitle)p.graphLabel=p.shortTitle;if(!p.doi){p.sourceUrl=p.evidence.find(e=>e.paperId===p.id)?.url||'';p.sourceLabel='확인한 논문 페이지';}}
     D.questions=[...(D.questions||window.NAND_FRONTIERS||[]),...review.questions.filter(q=>!(D.questions||window.NAND_FRONTIERS||[]).some(x=>x.id===q.id))];
